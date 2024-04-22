@@ -50,9 +50,7 @@ def loginRoute():
 
         # pasamos de tupla a diccionario
         dataParaToken: dict = {
-
             'id': result[0], 'nombre': result[1], 'correo': result[2],
-
         }
 
         return crearToken(dataParaToken)
@@ -74,17 +72,9 @@ def verificarToken():
 @routes_auth.route('/register', methods=['POST'])
 def register():
     dat = request.get_json()
-    nombre = dat['nombre']
-    correo = dat['correo']
-    contrasena = dat['contrasena']
 
-    token = request.headers['Authorization'].split(" ")[1]
-    validacion = validarToken(token, False)
-
-    ## si el token es valido
-    if validacion:
-
-        datosToken = validarToken(token, True)
+    ## si los datos son validos
+    if dat:
 
         try:
             fecha_creacion = datetime.now()
@@ -121,6 +111,3 @@ def register():
             response = jsonify({'message': error[1], 'numErro': error[0]})
             response.status_code = 400
             return response
-
-    else:
-        return validacion
