@@ -53,6 +53,8 @@ def loginRoute():
             'id': result[0], 'nombre': result[1], 'correo': result[2],
         }
 
+        print(dataParaToken)
+
         return crearToken(dataParaToken)
 
 

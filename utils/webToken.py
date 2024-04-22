@@ -11,7 +11,6 @@ def expiracionToken(minute: int):
 
     dateExpiration = dateNow + timedelta(minutes=minute)
 
-    print(dateExpiration)
     return dateExpiration
 
 
