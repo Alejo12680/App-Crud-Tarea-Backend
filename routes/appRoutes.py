@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 from databases.db_mysql import get_connection
 from utils.webToken import crearToken, validarToken
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,8 +21,7 @@ def loginRoute():
     cur = conn.cursor()
     # generamos la consulta
     cur.execute(
-        "SELECT * FROM tb_usuario_register WHERE correo = '{}' and tb_usuario_register.estado = 'Activo'".format(
-            correo))
+        "SELECT * FROM tb_usuario_register WHERE correo = '{}' and tb_usuario_register.estado = 'Activo'".format(correo))
 
     result = cur.fetchone()
 
@@ -60,15 +59,24 @@ def loginRoute():
 
 @routes_auth.route('/verificarToken', methods=['GET'])
 def verificarToken():
-    token = request.headers['Authorization'].split(" ")[1]
+    token = request.headers.get('Authorization')
+
+    if not token:
+        # No se proporcionó el token en los encabezados de la solicitud
+        response = jsonify({"message": "Token missing", "Authorization": False})
+        response.status_code = 401
+        return response
+
+    token = token.split(" ")[1]
 
     validacion = validarToken(token, False)
 
-    if validacion:
-        return jsonify({"message": "Token success", "Authorization": True})
-
-    else:
+    if isinstance(validacion, Response):
+        # La función validarToken() devolvió una respuesta de error
         return validacion
+    else:
+        # La función validarToken() devolvió los datos decodificados del token
+        return jsonify({"message": "Token success", "Authorization": True})
 
 
 @routes_auth.route('/register', methods=['POST'])
@@ -77,7 +85,6 @@ def register():
 
     ## si los datos son validos
     if dat:
-
         try:
             fecha_creacion = datetime.now()
             nombre = dat['nombre']
